@@ -342,11 +342,10 @@ void scale_neighbors(BMU *bmu, Sample *sample, double iteration_radius, double l
   outer.x = outer.y = iteration_radius;
 
   double distance, scale;
-  int y_coord, x_coord, int_iteration_radius = (int)iteration_radius;
+  int y_coord, x_coord, x_offset, y_offset, int_iteration_radius = (int)iteration_radius;
 
   for (int y = -int_iteration_radius; y < int_iteration_radius; y++)
     for (int x = -int_iteration_radius; x < int_iteration_radius; x++)
-      if ((y + bmu->y_coord) >= 0 && (y + bmu->y_coord) < MAP_HEIGHT && (x + bmu->x_coord) >= 0 && (x + bmu->x_coord) < MAP_WIDTH)
       {
         outer.x = x;
         outer.y = y;
@@ -354,8 +353,10 @@ void scale_neighbors(BMU *bmu, Sample *sample, double iteration_radius, double l
         if (distance < iteration_radius)
         {
           scale = learning_rule * exp(-10.0f * (distance * distance) / (iteration_radius * iteration_radius));
-          x_coord = bmu->x_coord + x;
-          y_coord = bmu->y_coord + y;
+          x_offset = x + bmu->x_coord;
+          y_offset = y + bmu->y_coord;
+          x_coord = x_offset < 0 ? MAP_WIDTH + x_offset : (x_offset >= MAP_WIDTH ? x_offset - MAP_WIDTH: x_offset);
+          y_coord = y_offset < 0 ? MAP_HEIGHT + y_offset : (y_offset >= MAP_HEIGHT ? y_offset - MAP_HEIGHT : y_offset);
           scale_neuron_at_position(x_coord, y_coord, sample, scale, total_components);
         }
       }
